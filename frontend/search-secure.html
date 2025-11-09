@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Búsqueda de Productos - XSS DOM Mitigado</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+        }
+        
+        .navbar {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+            padding: 20px 40px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .navbar h1 {
+            font-size: 24px;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+        
+        .success-banner {
+            background: #d4edda;
+            border: 2px solid #c3e6cb;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .success-banner .icon {
+            font-size: 32px;
+        }
+        
+        .success-banner .content h3 {
+            color: #155724;
+            margin-bottom: 5px;
+        }
+        
+        .success-banner .content p {
+            color: #155724;
+            font-size: 14px;
+        }
+        
+        .search-card {
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        
+        .search-card h2 {
+            color: #11998e;
+            margin-bottom: 25px;
+            font-size: 24px;
+        }
+        
+        .search-box {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .search-box input {
+            flex: 1;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+        }
+        
+        .search-box input:focus {
+            outline: none;
+            border-color: #11998e;
+        }
+        
+        .search-box button {
+            padding: 15px 40px;
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .search-box button:hover {
+            transform: translateY(-2px);
+        }
+        
+        #results {
+            min-height: 100px;
+        }
+        
+        .result-header {
+            font-size: 20px;
+            color: #333;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        
+        .no-results {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+        
+        .security-info {
+            background: #d1ecf1;
+            border-left: 4px solid #17a2b8;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 30px;
+        }
+        
+        .security-info h3 {
+            color: #0c5460;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        
+        .security-info .mitigation {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+        
+        .security-info .mitigation h4 {
+            color: #11998e;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        
+        .security-info code {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 6px;
+            display: block;
+            margin: 10px 0;
+            font-size: 12px;
+            color: #c7254e;
+            overflow-x: auto;
+        }
+        
+        .security-info p {
+            color: #0c5460;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        
+        .back-link {
+            display: inline-block;
+            margin-top: 30px;
+            padding: 12px 30px;
+            background: white;
+            color: #11998e;
+            text-decoration: none;
+            border: 2px solid #11998e;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .back-link:hover {
+            background: #11998e;
+            color: white;
+        }
+        
+        .comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .comparison-item {
+            padding: 15px;
+            border-radius: 8px;
+        }
+        
+        .vulnerable {
+            background: #f8d7da;
+            border: 2px solid #f5c6cb;
+        }
+        
+        .secure {
+            background: #d4edda;
+            border: 2px solid #c3e6cb;
+        }
+        
+        .comparison-item h5 {
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+        
+        .vulnerable h5 {
+            color: #721c24;
+        }
+        
+        .secure h5 {
+            color: #155724;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <h1>🔒 Búsqueda de Productos (XSS DOM Mitigado)</h1>
+    </nav>
+    
+    <div class="container">
+        <!-- Success Banner -->
+        <div class="success-banner">
+            <div class="icon">✅</div>
+            <div class="content">
+                <h3>Protección XSS DOM Activa</h3>
+                <p>Este buscador sanitiza todo el input del usuario antes de insertarlo en el DOM.</p>
+            </div>
+        </div>
+        
+        <!-- Search Card -->
+        <div class="search-card">
+            <h2>Buscar Productos</h2>
+            
+            <div class="search-box">
+                <input type="text" 
+                       id="searchInput" 
+                       placeholder="Ej: laptop, mouse, teclado..."
+                       autofocus>
+                <button onclick="searchProducts()">Buscar</button>
+            </div>
+            
+            <div id="results"></div>
+            
+            <!-- Security Info -->
+            <div class="security-info">
+                <h3>✅ Código Seguro</h3>
+                
+                <div class="mitigation">
+                    <h4>1. Usar textContent en lugar de innerHTML</h4>
+                    <code>// ✅ Seguro - No interpreta HTML
+element.textContent = userInput;</code>
+                    <p>textContent inserta texto plano, no permite ejecución de JavaScript.</p>
+                </div>
+                
+                <div class="mitigation">
+                    <h4>2. Crear elementos con JavaScript</h4>
+                    <code>// ✅ Seguro - Construcción programática del DOM
+const h3 = document.createElement('h3');
+h3.textContent = `Resultados para: ${query}`;
+resultsDiv.appendChild(h3);</code>
+                    <p>Crear elementos con createElement y manipularlos con textContent es seguro.</p>
+                </div>
+                
+                <div class="mitigation">
+                    <h4>3. Sanitización con DOMPurify (si se requiere HTML)</h4>
+                    <code>// ✅ Si necesitas permitir HTML limitado
+import DOMPurify from 'dompurify';
+element.innerHTML = DOMPurify.sanitize(userInput);</code>
+                    <p>DOMPurify elimina todo el JavaScript malicioso del HTML.</p>
+                </div>
+                
+                <div class="mitigation">
+                    <h4>4. Content Security Policy (CSP)</h4>
+                    <code>// En el servidor o meta tag
+Content-Security-Policy: default-src 'self'; script-src 'self'</code>
+                    <p>CSP previene la ejecución de scripts inline no autorizados.</p>
+                </div>
+                
+                <div class="comparison">
+                    <div class="comparison-item vulnerable">
+                        <h5>❌ Código Vulnerable</h5>
+                        <code>innerHTML = `&lt;h3&gt;${query}&lt;/h3&gt;`</code>
+                    </div>
+                    <div class="comparison-item secure">
+                        <h5>✅ Código Seguro</h5>
+                        <code>textContent = query</code>
+                    </div>
+                </div>
+                
+                <p style="margin-top: 20px; padding: 15px; background: white; border-radius: 6px;">
+                    <strong>🧪 Prueba con payloads XSS:</strong><br>
+                    Intenta buscar: <code>&lt;img src=x onerror=alert('XSS')&gt;</code><br>
+                    Resultado: El código será tratado como texto plano y se mostrará sin ejecutarse.
+                </p>
+            </div>
+        </div>
+        
+        <a href="/dashboard-secure.html" class="back-link">← Volver al Dashboard</a>
+        <a href="/search.html" class="back-link" style="margin-left: 15px;">🔓 Ver Versión Vulnerable</a>
+    </div>
+    
+    <script>
+        // ✅ FUNCIÓN SEGURA CONTRA XSS DOM
+        function searchProducts() {
+            const query = document.getElementById('searchInput').value;
+            const resultsDiv = document.getElementById('results');
+            
+            // Limpiar resultados previos
+            resultsDiv.innerHTML = '';
+            
+            if (!query.trim()) {
+                const noResultsDiv = document.createElement('div');
+                noResultsDiv.className = 'no-results';
+                noResultsDiv.textContent = 'Por favor ingresa un término de búsqueda';
+                resultsDiv.appendChild(noResultsDiv);
+                return;
+            }
+            
+            // ✅ MITIGACIÓN 1: Crear elementos con createElement
+            const resultHeader = document.createElement('div');
+            resultHeader.className = 'result-header';
+            
+            // ✅ MITIGACIÓN 2: Usar textContent (no innerHTML)
+            // textContent trata TODO como texto plano, no interpreta HTML
+            resultHeader.textContent = `Resultados para: ${query}`;
+            
+            // Crear contenedor de "no results"
+            const noResultsDiv = document.createElement('div');
+            noResultsDiv.className = 'no-results';
+            
+            // Primer párrafo con el query sanitizado
+            const p1 = document.createElement('p');
+            // ✅ textContent escapa automáticamente caracteres especiales
+            p1.textContent = `No se encontraron productos para "${query}"`;
+            
+            // Segundo párrafo con sugerencias
+            const p2 = document.createElement('p');
+            p2.style.fontSize = '12px';
+            p2.style.color = '#999';
+            p2.style.marginTop = '10px';
+            p2.textContent = 'Intenta con términos como: laptop, mouse, teclado';
+            
+            // Construir estructura del DOM
+            noResultsDiv.appendChild(p1);
+            noResultsDiv.appendChild(p2);
+            
+            // ✅ Agregar al DOM de forma segura
+            resultsDiv.appendChild(resultHeader);
+            resultsDiv.appendChild(noResultsDiv);
+            
+            // ✅ Mostrar en consola qué se sanitizó
+            console.log('═══════════════════════════════════════');
+            console.log('✅ BÚSQUEDA SEGURA EJECUTADA');
+            console.log('═══════════════════════════════════════');
+            console.log('Input original:', query);
+            console.log('Método usado: createElement() + textContent');
+            console.log('Código malicioso bloqueado: SÍ');
+            console.log('Se mostró como texto plano: SÍ');
+            console.log('═══════════════════════════════════════');
+            
+            // Resaltar visualmente si hay caracteres sospechosos
+            if (query.includes('<') || query.includes('>') || query.includes('script')) {
+                const warningDiv = document.createElement('div');
+                warningDiv.style.cssText = `
+                    background: #d4edda;
+                    border: 2px solid #28a745;
+                    padding: 15px;
+                    border-radius: 8px;
+                    margin-top: 20px;
+                    color: #155724;
+                `;
+                warningDiv.innerHTML = `
+                    <strong>🛡️ Intento de XSS Bloqueado</strong><br>
+                    <small>Se detectaron caracteres HTML/JavaScript en tu búsqueda.</small><br>
+                    <small>Fueron sanitizados y mostrados como texto plano.</small>
+                `;
+                resultsDiv.appendChild(warningDiv);
+                
+                console.warn('⚠️ Caracteres sospechosos detectados y neutralizados');
+            }
+        }
+        
+        // Cargar búsqueda desde parámetro URL (también seguro)
+        window.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const query = urlParams.get('q');
+            
+            if (query) {
+                // ✅ Sanitizar también el input desde URL
+                document.getElementById('searchInput').value = query;
+                searchProducts();
+            }
+        });
+        
+        // Búsqueda con Enter
+        document.getElementById('searchInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                searchProducts();
+            }
+        });
+        
+     
+    </script>
+</body>
+</html>

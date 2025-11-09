@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  mvp-owasp:
+    build: .
+    container_name: mvp-owasp-security
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./backend:/app/backend
+      - ./frontend:/app/frontend
+      - ./attack:/app/attack
+    environment:
+      - FLASK_APP=backend/app.py
+      - FLASK_ENV=development
+      - PYTHONUNBUFFERED=1
+    restart: unless-stopped
+    networks:
+      - owasp-net
+
+networks:
+  owasp-net:
+    driver: bridge

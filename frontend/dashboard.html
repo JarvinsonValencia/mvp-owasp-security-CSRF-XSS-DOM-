@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - CSRF Vulnerable</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+        }
+        
+        .navbar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .navbar h1 {
+            font-size: 24px;
+        }
+        
+        .navbar .user-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .navbar .user-email {
+            background: rgba(255,255,255,0.2);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+        
+        .navbar button {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+        
+        .navbar button:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+        
+        .warning-banner {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .warning-banner .icon {
+            font-size: 32px;
+        }
+        
+        .warning-banner .content h3 {
+            color: #856404;
+            margin-bottom: 5px;
+        }
+        
+        .warning-banner .content p {
+            color: #856404;
+            font-size: 14px;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .card h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .btn-primary {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            width: 100%;
+            padding: 14px;
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+        
+        .btn-secondary:hover {
+            background: #667eea;
+            color: white;
+        }
+        
+        .alert {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+        
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .links {
+            margin-top: 30px;
+            display: flex;
+            gap: 15px;
+        }
+        
+        .links a {
+            flex: 1;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <h1>🔓 Dashboard (CSRF Vulnerable)</h1>
+        <div class="user-info">
+            <span class="user-email" id="userEmail">Cargando...</span>
+            <button onclick="logout()">Cerrar Sesión</button>
+        </div>
+    </nav>
+    
+    <div class="container">
+        <!-- Warning Banner -->
+        <div class="warning-banner">
+            <div class="icon">⚠️</div>
+            <div class="content">
+                <h3>Vulnerabilidad: CSRF (Cross-Site Request Forgery)</h3>
+                <p>Este endpoint NO valida tokens CSRF. Un atacante puede cambiar tu email sin autorización.</p>
+            </div>
+        </div>
+        
+        <div class="grid">
+            <!-- Cambio de Email -->
+            <div class="card">
+                <h2>📧 Cambiar Email</h2>
+                <div id="message" style="display: none;"></div>
+                
+                <form id="emailForm">
+                    <div class="form-group">
+                        <label for="newEmail">Nuevo Email:</label>
+                        <input type="email" id="newEmail" name="newEmail" required
+                               placeholder="nuevo@email.com">
+                    </div>
+                    
+                    <button type="submit" class="btn-primary">
+                        Actualizar Email
+                    </button>
+                </form>
+                
+                <div style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                    <strong style="color: #dc3545;">❌ Sin protección CSRF</strong>
+                    <p style="margin-top: 8px; font-size: 13px; color: #666;">
+                        Este formulario no incluye token CSRF. Es vulnerable a ataques.
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Otras Funcionalidades -->
+            <div class="card">
+                <h2>🔍 Ir a Búsqueda</h2>
+                <p style="margin-bottom: 20px; color: #666; font-size: 14px;">
+                    Prueba el buscador de productos (vulnerable a XSS DOM)
+                </p>
+                <a href="/search.html" class="btn-secondary">
+                    Abrir Buscador
+                </a>
+                
+                <div style="margin-top: 30px;">
+                    <h3 style="color: #667eea; font-size: 16px; margin-bottom: 15px;">
+                        📚 Documentación
+                    </h3>
+                    <ul style="list-style: none; padding: 0;">
+                        <li style="margin-bottom: 10px;">
+                            <a href="/docs/poc-csrf.html" style="color: #667eea; text-decoration: none;">
+                                📄 PoC CSRF →
+                            </a>
+                        </li>
+                        <li style="margin-bottom: 10px;">
+                            <a href="/docs/poc-xss.html" style="color: #667eea; text-decoration: none;">
+                                📄 PoC XSS DOM →
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Links a versiones seguras -->
+        <div class="links">
+            <a href="/dashboard-secure.html" class="btn-secondary">
+                🔒 Ver Versión Segura (CSRF Mitigado)
+            </a>
+            <a href="/search-secure.html" class="btn-secondary">
+                🔒 Ver Buscador Seguro (XSS Mitigado)
+            </a>
+        </div>
+    </div>
+    
+    <script>
+        // Verificar autenticación
+        async function checkAuth() {
+            try {
+                const response = await fetch('/api/session', {
+                    credentials: 'include'
+                });
+                
+                if (!response.ok) {
+                    window.location.href = '/';
+                    return;
+                }
+                
+                const data = await response.json();
+                document.getElementById('userEmail').textContent = data.user.email;
+            } catch (error) {
+                window.location.href = '/';
+            }
+        }
+        
+        // Cambiar email (VULNERABLE - sin CSRF token)
+        document.getElementById('emailForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const newEmail = document.getElementById('newEmail').value;
+            const messageDiv = document.getElementById('message');
+            
+            try {
+                // ❌ NO SE ENVÍA TOKEN CSRF
+                const response = await fetch('/api/profile/email', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({ email: newEmail })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    messageDiv.className = 'alert alert-success';
+                    messageDiv.textContent = data.message;
+                    messageDiv.style.display = 'block';
+                    
+                    // Actualizar email mostrado
+                    document.getElementById('userEmail').textContent = newEmail;
+                    localStorage.setItem('user_email', newEmail);
+                    
+                    // Limpiar formulario
+                    document.getElementById('emailForm').reset();
+                } else {
+                    messageDiv.className = 'alert alert-error';
+                    messageDiv.textContent = data.error;
+                    messageDiv.style.display = 'block';
+                }
+            } catch (error) {
+                messageDiv.className = 'alert alert-error';
+                messageDiv.textContent = 'Error de conexión';
+                messageDiv.style.display = 'block';
+            }
+        });
+        
+        // Logout
+        async function logout() {
+            await fetch('/api/logout', {
+                method: 'POST',
+                credentials: 'include'
+            });
+            localStorage.clear();
+            window.location.href = '/';
+        }
+        
+        // Inicializar
+        checkAuth();
+    </script>
+</body>
+</html>

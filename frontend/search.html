@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Búsqueda de Productos - XSS DOM Vulnerable</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+        }
+        
+        .navbar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px 40px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .navbar h1 {
+            font-size: 24px;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+        
+        .warning-banner {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .warning-banner .icon {
+            font-size: 32px;
+        }
+        
+        .warning-banner .content h3 {
+            color: #856404;
+            margin-bottom: 5px;
+        }
+        
+        .warning-banner .content p {
+            color: #856404;
+            font-size: 14px;
+        }
+        
+        .search-card {
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        
+        .search-card h2 {
+            color: #667eea;
+            margin-bottom: 25px;
+            font-size: 24px;
+        }
+        
+        .search-box {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .search-box input {
+            flex: 1;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+        }
+        
+        .search-box input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .search-box button {
+            padding: 15px 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .search-box button:hover {
+            transform: translateY(-2px);
+        }
+        
+        #results {
+            min-height: 100px;
+        }
+        
+        .result-header {
+            font-size: 20px;
+            color: #333;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        
+        .no-results {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+        
+        .vulnerability-info {
+            background: #f8f9fa;
+            border-left: 4px solid #dc3545;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 30px;
+        }
+        
+        .vulnerability-info h3 {
+            color: #dc3545;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        
+        .vulnerability-info code {
+            background: white;
+            padding: 12px;
+            border-radius: 6px;
+            display: block;
+            margin: 10px 0;
+            font-size: 13px;
+            color: #c7254e;
+            overflow-x: auto;
+        }
+        
+        .vulnerability-info p {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        
+        .back-link {
+            display: inline-block;
+            margin-top: 30px;
+            padding: 12px 30px;
+            background: white;
+            color: #667eea;
+            text-decoration: none;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .back-link:hover {
+            background: #667eea;
+            color: white;
+        }
+        
+        .payload-examples {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+        
+        .payload-examples h4 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+        
+        .payload-item {
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 6px;
+        }
+        
+        .payload-item strong {
+            color: #333;
+            display: block;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+        
+        .payload-item code {
+            background: white;
+            padding: 8px;
+            border-radius: 4px;
+            display: block;
+            font-size: 12px;
+            color: #c7254e;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <h1>🔍 Búsqueda de Productos (XSS DOM Vulnerable)</h1>
+    </nav>
+    
+    <div class="container">
+        <!-- Warning Banner -->
+        <div class="warning-banner">
+            <div class="icon">⚠️</div>
+            <div class="content">
+                <h3>Vulnerabilidad: XSS DOM (DOM-based Cross-Site Scripting)</h3>
+                <p>Este buscador NO sanitiza el input del usuario antes de insertarlo en el DOM usando innerHTML.</p>
+            </div>
+        </div>
+        
+        <!-- Search Card -->
+        <div class="search-card">
+            <h2>Buscar Productos</h2>
+            
+            <div class="search-box">
+                <input type="text" 
+                       id="searchInput" 
+                       placeholder="Ej: laptop, mouse, teclado..."
+                       autofocus>
+                <button onclick="searchProducts()">Buscar</button>
+            </div>
+            
+            <div id="results"></div>
+            
+            <!-- Vulnerability Info -->
+            <div class="vulnerability-info">
+                <h3>❌ Código Vulnerable</h3>
+                <p>El siguiente código es vulnerable a XSS DOM:</p>
+                <code>resultsDiv.innerHTML = `&lt;h3&gt;Resultados para: ${query}&lt;/h3&gt;`;</code>
+                
+                <div class="payload-examples">
+                    <h4>🎯 Prueba estos payloads:</h4>
+                    
+                    <div class="payload-item">
+                        <strong>1. Alert básico:</strong>
+                        <code>&lt;img src=x onerror=alert('XSS')&gt;</code>
+                    </div>
+        
+                    <div class="payload-item">
+                        <strong>2. Robo de cookies:</strong>
+                        <code>&lt;img src=x onerror=alert(document.cookie)&gt;</code>
+                    </div>
+                    
+                    <div class="payload-item">
+                        <strong>3. IFRAME JavaScript:</strong>
+                        <code>&lt;iframe src="javascript:alert('XSS')"&gt;</code>
+                    </div>
+                    
+                    <div class="payload-item">
+                        <strong>4. Modificar página completa:</strong>
+                        <code>&lt;img src=x onerror="document.body.innerHTML='&lt;h1&gt;HACKEADO&lt;/h1&gt;'"&gt;</code>
+                    </div>
+                    
+                    <div class="payload-item">
+                        <strong>5. INPUT con autofocus:</strong>
+                        <code>&lt;input autofocus onfocus=alert('XSS')&gt;</code>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <a href="/dashboard.html" class="back-link">← Volver al Dashboard</a>
+        <a href="/search-secure.html" class="back-link" style="margin-left: 15px;">🔒 Ver Versión Segura</a>
+    </div>
+    
+    <script>
+        // ❌ FUNCIÓN VULNERABLE A XSS DOM
+        function searchProducts() {
+            const query = document.getElementById('searchInput').value;
+            const resultsDiv = document.getElementById('results');
+            
+            if (!query.trim()) {
+                resultsDiv.innerHTML = '<div class="no-results">Por favor ingresa un término de búsqueda</div>';
+                return;
+            }
+            
+            // ❌ VULNERABILIDAD: innerHTML con input del usuario sin sanitizar
+            resultsDiv.innerHTML = `
+                <div class="result-header">
+                    Resultados para: ${query}
+                </div>
+                <div class="no-results">
+                    <p>No se encontraron productos para "${query}"</p>
+                    <p style="font-size: 12px; color: #999; margin-top: 10px;">
+                        Intenta con términos como: laptop, mouse, teclado
+                    </p>
+                </div>
+            `;
+        }
+        
+        // Cargar búsqueda desde parámetro URL
+        window.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const query = urlParams.get('q');
+            
+            if (query) {
+                document.getElementById('searchInput').value = query;
+                searchProducts();
+            }
+        });
+        
+        // Búsqueda con Enter
+        document.getElementById('searchInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                searchProducts();
+            }
+        });
+    </script>
+</body>
+</html>

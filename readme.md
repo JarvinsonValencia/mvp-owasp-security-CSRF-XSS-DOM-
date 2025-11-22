@@ -1,12 +1,7 @@
-# 🎯 MVP OWASP - Proyecto Final Seguridad Ofensiva
+# 🎯 MVP OWASP
 
 ## 📋 Información del Proyecto
 
-**Asignatura:** Seguridad Ofensiva y S-SDLC  
-**Proyecto:** MVP con Vulnerabilidades OWASP  
-**Fecha:** 2025
-
----
 
 ## 🔐 Vulnerabilidades Implementadas
 
@@ -517,53 +512,6 @@ curl -X POST http://localhost:5000/api/profile/email/secure \
 
 ---
 
-## 📊 3.6. Criterios de Aceptación (Parte II)
-
-### ✅ Criterio 1: Reproducción de Vulnerabilidades
-
-- [x] **XSS DOM:** Payloads documentados ejecutándose exitosamente
-  - Alert básico ✓
-  - Robo de cookies ✓
-  - Redirección maliciosa ✓
-  - Evidencias en screenshots y código fuente ✓
-
-- [x] **CSRF:** Ataque reproducible con documentación completa
-  - Formulario malicioso funcional ✓
-  - Cambio no autorizado de email ✓
-  - PoC con página HTML externa ✓
-  - Flujo de ataque documentado ✓
-
-### ✅ Criterio 2: Controles de Mitigación
-
-- [x] **XSS DOM Mitigado:**
-  - textContent en lugar de innerHTML ✓
-  - createElement para construcción de DOM ✓
-  - CSP implementado ✓
-  - Payloads anteriores bloqueados ✓
-
-- [x] **CSRF Mitigado:**
-  - Tokens CSRF generados por sesión ✓
-  - Validación en servidor ✓
-  - SameSite cookies configuradas ✓
-  - Ataques anteriores bloqueados ✓
-
-### ✅ Criterio 3: Pruebas Antes/Después
-
-| Vulnerabilidad | Antes (Vulnerable) | Después (Mitigado) | Estado |
-|----------------|--------------------|--------------------|--------|
-| XSS DOM | `<img>` ejecuta alert | Mostrado como texto | ✅ |
-| CSRF | Email cambiado sin token | Error 403 sin token | ✅ |
-
-### ✅ Criterio 4: Documentación
-
-- [x] README completo con instrucciones ✓
-- [x] Historias de usuario documentadas ✓
-- [x] PoCs paso a paso ✓
-- [x] Evidencias de mitigación ✓
-- [x] Código comentado ✓
-
----
-
 ## 🎓 Referencias
 
 ### OWASP
@@ -582,8 +530,8 @@ curl -X POST http://localhost:5000/api/profile/email/secure \
 
 ## 👨‍💻 Autores
 
-- **Estudiante 1:** [Nombre]
-- **Estudiante 2:** [Nombre]
+- Jarvinson Javier Valencia Yate
+- Juan Diego Muñoz Ospina
 
 ---
 
@@ -595,10 +543,4 @@ Este proyecto es únicamente con fines educativos para el curso de Seguridad Ofe
 
 ---
 
-## 📞 Soporte
-
-Para preguntas sobre el proyecto, contactar a los autores o al profesor del curso.
-
----
-
-**Proyecto Final - Seguridad Ofensiva y S-SDLC - 2025**
+**2025**

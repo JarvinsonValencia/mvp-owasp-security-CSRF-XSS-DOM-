@@ -259,31 +259,35 @@
                 <div class="mitigation">
                     <h4>1. Usar textContent en lugar de innerHTML</h4>
                     <code>// ✅ Seguro - No interpreta HTML
-element.textContent = userInput;</code>
+                        element.textContent = userInput;
+                    </code>
                     <p>textContent inserta texto plano, no permite ejecución de JavaScript.</p>
                 </div>
                 
                 <div class="mitigation">
                     <h4>2. Crear elementos con JavaScript</h4>
                     <code>// ✅ Seguro - Construcción programática del DOM
-const h3 = document.createElement('h3');
-h3.textContent = `Resultados para: ${query}`;
-resultsDiv.appendChild(h3);</code>
+                        const h3 = document.createElement('h3');
+                        h3.textContent = `Resultados para: ${query}`;
+                        resultsDiv.appendChild(h3);
+                    </code>
                     <p>Crear elementos con createElement y manipularlos con textContent es seguro.</p>
                 </div>
                 
                 <div class="mitigation">
                     <h4>3. Sanitización con DOMPurify (si se requiere HTML)</h4>
                     <code>// ✅ Si necesitas permitir HTML limitado
-import DOMPurify from 'dompurify';
-element.innerHTML = DOMPurify.sanitize(userInput);</code>
+                        import DOMPurify from 'dompurify';
+                        element.innerHTML = DOMPurify.sanitize(userInput);
+                    </code>
                     <p>DOMPurify elimina todo el JavaScript malicioso del HTML.</p>
                 </div>
                 
                 <div class="mitigation">
                     <h4>4. Content Security Policy (CSP)</h4>
                     <code>// En el servidor o meta tag
-Content-Security-Policy: default-src 'self'; script-src 'self'</code>
+                        Content-Security-Policy: default-src 'self'; script-src 'self'
+                    </code>
                     <p>CSP previene la ejecución de scripts inline no autorizados.</p>
                 </div>
                 

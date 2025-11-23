@@ -9,8 +9,10 @@ from datetime import timedelta
 app = Flask(__name__, static_folder='../frontend', static_url_path='')
 app.secret_key = secrets.token_hex(32)
 app.config['SESSION_COOKIE_HTTPONLY'] = True
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+app.config['SESSION_COOKIE_SECURE'] = False
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=1)
-CORS(app, supports_credentials=True, origins=['http://localhost:5000'])
+CORS(app, supports_credentials=True)
 
 DATABASE = 'users.db'
 
@@ -70,14 +72,30 @@ def index():
 @app.route('/<path:path>')
 def serve_static(path):
     """Servir archivos estáticos (HTML, CSS, JS)"""
-    try:
-        return send_file(f'../frontend/{path}')
-    except FileNotFoundError:
-        # Si no encuentra en frontend, buscar en attack
-        try:
-            return send_file(f'../attack/{path}')
-        except FileNotFoundError:
-            return jsonify({'error': 'Archivo no encontrado'}), 404
+    import os
+    
+    # Obtener directorio base del proyecto
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    
+    # Intentar en frontend primero
+    frontend_path = os.path.join(base_dir, 'frontend', path)
+    print(f"🔍 Buscando en frontend: {frontend_path}")
+    print(f"   ¿Existe?: {os.path.exists(frontend_path)}")
+    if os.path.exists(frontend_path):
+        print(f"✅ Sirviendo desde frontend: {path}")
+        return send_file(frontend_path)
+    
+    # Luego intentar en attack
+    attack_path = os.path.join(base_dir, 'attack', path)
+    print(f"🔍 Buscando en attack: {attack_path}")
+    print(f"   ¿Existe?: {os.path.exists(attack_path)}")
+    if os.path.exists(attack_path):
+        print(f"✅ Sirviendo desde attack: {path}")
+        return send_file(attack_path)
+    
+    # Si no existe, retornar 404
+    print(f"❌ Archivo no encontrado: {path}")
+    return jsonify({'error': f'Archivo no encontrado: {path}'}), 404
 
 # ============================================
 # ENDPOINTS - AUTENTICACIÓN

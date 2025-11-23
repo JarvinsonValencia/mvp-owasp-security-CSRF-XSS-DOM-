@@ -9,7 +9,7 @@ services:
     volumes:
       - ./backend:/app/backend
       - ./frontend:/app/frontend
-      - ./attack:/app/attack
+     # - ./attack:/app/attack
     environment:
       - FLASK_APP=backend/app.py
       - FLASK_ENV=development
